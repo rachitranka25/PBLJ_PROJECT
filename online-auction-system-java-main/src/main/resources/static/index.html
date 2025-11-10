@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Auction System - Bid & Win</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <h1>🏛️ AuctionHub</h1>
+            </div>
+            <div class="nav-links">
+                <button id="homeBtn" class="nav-link active">Home</button>
+                <button id="myAuctionsBtn" class="nav-link">My Auctions</button>
+                <button id="createAuctionBtn" class="nav-link">Create Auction</button>
+                <div id="authButtons">
+                    <button id="loginBtn" class="btn-primary">Login</button>
+                    <button id="registerBtn" class="btn-secondary">Register</button>
+                </div>
+                <div id="userMenu" class="user-menu" style="display: none;">
+                    <span id="userName"></span>
+                    <button id="logoutBtn" class="btn-secondary">Logout</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="heroSection">
+        <div class="hero-content">
+            <h1 class="hero-title">Welcome to AuctionHub</h1>
+            <p class="hero-subtitle">Discover unique items and place your winning bids</p>
+            <button class="btn-hero" onclick="scrollToAuctions()">Explore Auctions</button>
+        </div>
+        <div class="hero-waves">
+            <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+                <path d="M0,0 C150,100 350,0 500,50 C650,100 850,0 1000,50 L1000,120 L0,120 Z" fill="currentColor"></path>
+            </svg>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Search Bar -->
+        <div class="search-container">
+            <input type="text" id="searchInput" class="search-input" placeholder="Search auctions...">
+            <button id="searchBtn" class="search-btn">🔍</button>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="filter-tabs">
+            <button class="filter-tab active" data-filter="all">All Auctions</button>
+            <button class="filter-tab" data-filter="active">Active</button>
+            <button class="filter-tab" data-filter="my">My Auctions</button>
+        </div>
+
+        <!-- Auctions Grid -->
+        <div id="auctionsContainer" class="auctions-grid">
+            <!-- Auctions will be loaded here -->
+        </div>
+
+        <!-- Loading Spinner -->
+        <div id="loadingSpinner" class="spinner" style="display: none;">
+            <div class="spinner-ring"></div>
+        </div>
+    </main>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Login</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="loginUsername" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                <button type="submit" class="btn-primary btn-full">Login</button>
+            </form>
+            <p id="loginError" class="error-message"></p>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Register</h2>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="registerFullName" required>
+                </div>
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="registerUsername" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="registerEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="registerPassword" required>
+                </div>
+                <button type="submit" class="btn-primary btn-full">Register</button>
+            </form>
+            <p id="registerError" class="error-message"></p>
+        </div>
+    </div>
+
+    <!-- Create Auction Modal -->
+    <div id="createAuctionModal" class="modal">
+        <div class="modal-content modal-large">
+            <span class="close">&times;</span>
+            <h2>Create New Auction</h2>
+            <form id="createAuctionForm">
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" id="auctionTitle" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="auctionDescription" rows="4" required></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Starting Price ($)</label>
+                        <input type="number" id="auctionStartingPrice" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>End Date & Time</label>
+                        <input type="datetime-local" id="auctionEndTime" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Image URL</label>
+                    <input type="url" id="auctionImageUrl" placeholder="https://example.com/image.jpg">
+                </div>
+                <button type="submit" class="btn-primary btn-full">Create Auction</button>
+            </form>
+            <p id="createAuctionError" class="error-message"></p>
+        </div>
+    </div>
+
+    <!-- Auction Detail Modal -->
+    <div id="auctionDetailModal" class="modal">
+        <div class="modal-content modal-large">
+            <span class="close">&times;</span>
+            <div id="auctionDetailContent">
+                <!-- Auction details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
+
+
+
+

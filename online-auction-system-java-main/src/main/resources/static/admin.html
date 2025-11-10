@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Auction System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card h3 {
+            color: #764ba2;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .stat-card p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .section {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .tab:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .tab.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: #f5f5f5;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .badge-active {
+            background: #4caf50;
+            color: white;
+        }
+
+        .badge-ended {
+            background: #f44336;
+            color: white;
+        }
+
+        .badge-cancelled {
+            background: #ff9800;
+            color: white;
+        }
+
+        .refresh-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-bottom: 20px;
+            transition: background 0.3s;
+        }
+
+        .refresh-btn:hover {
+            background: #764ba2;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .price {
+            font-weight: 600;
+            color: #4caf50;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .username {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .email {
+            font-size: 0.9em;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏛️ Admin Panel</h1>
+            <p>Online Auction System Management</p>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <h3 id="totalUsers">-</h3>
+                <p>Total Users</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="totalAuctions">-</h3>
+                <p>Total Auctions</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="activeAuctions">-</h3>
+                <p>Active Auctions</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="totalBids">-</h3>
+                <p>Total Bids</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Data Management</h2>
+            <button class="refresh-btn" onclick="loadAllData()">🔄 Refresh All Data</button>
+            
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('auctions')">Auctions</button>
+                <button class="tab" onclick="showTab('users')">Users</button>
+                <button class="tab" onclick="showTab('bids')">Bids</button>
+            </div>
+
+            <div id="auctions" class="tab-content active">
+                <h3>All Auctions</h3>
+                <div id="auctionsTable"></div>
+            </div>
+
+            <div id="users" class="tab-content">
+                <h3>All Users</h3>
+                <div id="usersTable"></div>
+            </div>
+
+            <div id="bids" class="tab-content">
+                <h3>All Bids</h3>
+                <div id="bidsTable"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8080/api';
+
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+
+            // Load data for the tab
+            if (tabName === 'auctions') loadAuctions();
+            else if (tabName === 'users') loadUsers();
+            else if (tabName === 'bids') loadBids();
+        }
+
+        async function loadAllData() {
+            await Promise.all([
+                loadStats(),
+                loadAuctions(),
+                loadUsers(),
+                loadBids()
+            ]);
+        }
+
+        async function loadStats() {
+            try {
+                const [auctions, users] = await Promise.all([
+                    fetch(`${API_BASE}/auctions`).then(r => r.json()),
+                    fetch(`${API_BASE}/auctions`).then(r => r.json()) // We'll get users from database directly
+                ]);
+
+                const activeAuctions = auctions.filter(a => a.status === 'ACTIVE').length;
+                
+                document.getElementById('totalAuctions').textContent = auctions.length;
+                document.getElementById('activeAuctions').textContent = activeAuctions;
+                
+                // For users and bids, we need to fetch from database or create an endpoint
+                // For now, we'll estimate from the data we have
+                const uniqueUsers = new Set(auctions.map(a => a.seller.id));
+                document.getElementById('totalUsers').textContent = uniqueUsers.size;
+                
+                const totalBids = auctions.reduce((sum, a) => sum + (a.bidCount || 0), 0);
+                document.getElementById('totalBids').textContent = totalBids;
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        async function loadAuctions() {
+            const container = document.getElementById('auctionsTable');
+            container.innerHTML = '<div class="loading">Loading auctions...</div>';
+
+            try {
+                const response = await fetch(`${API_BASE}/auctions`);
+                const auctions = await response.json();
+
+                if (auctions.length === 0) {
+                    container.innerHTML = '<p>No auctions found.</p>';
+                    return;
+                }
+
+                let html = '<table><thead><tr>';
+                html += '<th>ID</th><th>Title</th><th>Seller</th><th>Starting Price</th>';
+                html += '<th>Current Price</th><th>Status</th><th>Bids</th><th>End Time</th>';
+                html += '</tr></thead><tbody>';
+
+                auctions.forEach(auction => {
+                    const endDate = new Date(auction.endTime);
+                    const statusClass = auction.status === 'ACTIVE' ? 'badge-active' : 
+                                       auction.status === 'ENDED' ? 'badge-ended' : 'badge-cancelled';
+                    
+                    html += '<tr>';
+                    html += `<td>${auction.id}</td>`;
+                    html += `<td><strong>${auction.title}</strong><br><small style="color:#666">${auction.description.substring(0, 50)}...</small></td>`;
+                    html += `<td><div class="user-info"><span class="username">${auction.seller.username}</span><span class="email">${auction.seller.email}</span></div></td>`;
+                    html += `<td class="price">$${auction.startingPrice.toLocaleString()}</td>`;
+                    html += `<td class="price">$${auction.currentPrice.toLocaleString()}</td>`;
+                    html += `<td><span class="badge ${statusClass}">${auction.status}</span></td>`;
+                    html += `<td>${auction.bidCount || 0}</td>`;
+                    html += `<td>${endDate.toLocaleDateString()} ${endDate.toLocaleTimeString()}</td>`;
+                    html += '</tr>';
+                });
+
+                html += '</tbody></table>';
+                container.innerHTML = html;
+            } catch (error) {
+                container.innerHTML = `<div class="error">Error loading auctions: ${error.message}</div>`;
+            }
+        }
+
+        async function loadUsers() {
+            const container = document.getElementById('usersTable');
+            container.innerHTML = '<div class="loading">Loading users...</div>';
+
+            try {
+                // Get users from auctions (since we don't have a direct users endpoint)
+                const response = await fetch(`${API_BASE}/auctions`);
+                const auctions = await response.json();
+
+                const userMap = new Map();
+                auctions.forEach(auction => {
+                    const seller = auction.seller;
+                    if (!userMap.has(seller.id)) {
+                        userMap.set(seller.id, seller);
+                    }
+                });
+
+                const users = Array.from(userMap.values());
+
+                if (users.length === 0) {
+                    container.innerHTML = '<p>No users found.</p>';
+                    return;
+                }
+
+                let html = '<table><thead><tr>';
+                html += '<th>ID</th><th>Username</th><th>Email</th><th>Full Name</th>';
+                html += '</tr></thead><tbody>';
+
+                users.forEach(user => {
+                    html += '<tr>';
+                    html += `<td>${user.id}</td>`;
+                    html += `<td><strong>${user.username}</strong></td>`;
+                    html += `<td>${user.email}</td>`;
+                    html += `<td>${user.fullName}</td>`;
+                    html += '</tr>';
+                });
+
+                html += '</tbody></table>';
+                container.innerHTML = html;
+            } catch (error) {
+                container.innerHTML = `<div class="error">Error loading users: ${error.message}</div>`;
+            }
+        }
+
+        async function loadBids() {
+            const container = document.getElementById('bidsTable');
+            container.innerHTML = '<div class="loading">Loading bids...</div>';
+
+            try {
+                // Get bids from auctions
+                const response = await fetch(`${API_BASE}/auctions`);
+                const auctions = await response.json();
+
+                let allBids = [];
+                for (const auction of auctions) {
+                    try {
+                        const bidsResponse = await fetch(`${API_BASE}/auctions/${auction.id}/bids`);
+                        const bids = await bidsResponse.json();
+                        bids.forEach(bid => {
+                            allBids.push({
+                                ...bid,
+                                auctionTitle: auction.title,
+                                auctionId: auction.id
+                            });
+                        });
+                    } catch (e) {
+                        // Skip if error fetching bids for this auction
+                    }
+                }
+
+                if (allBids.length === 0) {
+                    container.innerHTML = '<p>No bids found.</p>';
+                    return;
+                }
+
+                let html = '<table><thead><tr>';
+                html += '<th>ID</th><th>Auction</th><th>Bidder</th><th>Amount</th><th>Bid Time</th>';
+                html += '</tr></thead><tbody>';
+
+                allBids.forEach(bid => {
+                    const bidDate = new Date(bid.bidTime);
+                    html += '<tr>';
+                    html += `<td>${bid.id}</td>`;
+                    html += `<td><strong>${bid.auctionTitle}</strong> (ID: ${bid.auctionId})</td>`;
+                    html += `<td>${bid.bidder ? bid.bidder.username : 'N/A'}</td>`;
+                    html += `<td class="price">$${bid.amount.toLocaleString()}</td>`;
+                    html += `<td>${bidDate.toLocaleDateString()} ${bidDate.toLocaleTimeString()}</td>`;
+                    html += '</tr>';
+                });
+
+                html += '</tbody></table>';
+                container.innerHTML = html;
+            } catch (error) {
+                container.innerHTML = `<div class="error">Error loading bids: ${error.message}</div>`;
+            }
+        }
+
+        // Load data on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadAllData();
+        });
+
+        // Auto-refresh every 30 seconds
+        setInterval(() => {
+            loadStats();
+            const activeTab = document.querySelector('.tab-content.active').id;
+            if (activeTab === 'auctions') loadAuctions();
+            else if (activeTab === 'users') loadUsers();
+            else if (activeTab === 'bids') loadBids();
+        }, 30000);
+    </script>
+</body>
+</html>
+
